@@ -1,0 +1,14 @@
+# R
+.Rproj.user/
+*.Rproj
+.RData
+.Rhistory
+
+# R virtual environment (if using renv)
+renv/
+
+# macOS
+.DS_Store
+
+# Node (not used, but just in case)
+node_modules/
