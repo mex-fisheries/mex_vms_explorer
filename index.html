@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mexico Fishing Vessel Tracker</title>
+  <link href="https://cdn.jsdelivr.net/npm/maplibre-gl@4/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="css/app.css" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top bar -->
+  <header id="topbar">
+    <div class="brand">MEX VMS Explorer</div>
+    <div class="topbar-stats">
+      <span id="stat-date">—</span>
+      <span class="sep">·</span>
+      <span id="stat-vessels">—</span>
+    </div>
+  </header>
+
+  <!-- Sidebar toggle button (mobile / collapsed state) -->
+  <button id="sidebar-toggle" title="Toggle filters">&#9776;</button>
+
+  <!-- Left sidebar: time controls + filters -->
+  <aside id="sidebar">
+
+    <!-- Month navigation -->
+    <section class="panel">
+      <h3>Month</h3>
+      <div id="month-nav"></div>
+    </section>
+
+    <!-- Playback controls -->
+    <section class="panel">
+      <h3>Day <span id="day-label">1</span></h3>
+      <div class="playback-row">
+        <button class="icon-btn" id="btn-prev" title="Previous day">&#9664;</button>
+        <button class="icon-btn" id="btn-play" title="Play/Pause">&#9654;</button>
+        <button class="icon-btn" id="btn-next" title="Next day">&#9654;&#9654;</button>
+      </div>
+      <input type="range" id="day-scrubber" min="1" max="31" value="1">
+      <div class="speed-row">
+        <label>Speed</label>
+        <select id="playback-speed">
+          <option value="300">0.5×</option>
+          <option value="150" selected>1×</option>
+          <option value="75">2×</option>
+          <option value="35">4×</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Filters -->
+    <section class="panel">
+      <h3>Filters <span id="filter-count"></span></h3>
+
+      <div class="filter-group">
+        <label class="filter-label">Fleet</label>
+        <div class="chip-group" id="filter-fleet">
+          <button class="chip active" data-value="large scale">Large Scale</button>
+          <button class="chip active" data-value="small scale">Small Scale</button>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Target Species</label>
+        <div class="chip-group" id="filter-species">
+          <button class="chip active" data-idx="0">Finfish</button>
+          <button class="chip active" data-idx="1">Sardine</button>
+          <button class="chip active" data-idx="2">Shark</button>
+          <button class="chip active" data-idx="3">Shrimp</button>
+          <button class="chip active" data-idx="4">Tuna</button>
+          <button class="chip active" data-idx="5">Other</button>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Gear Type</label>
+        <div class="chip-group" id="filter-gear">
+          <button class="chip active" data-idx="0">Trawler</button>
+          <button class="chip active" data-idx="1">Purse Seine</button>
+          <button class="chip active" data-idx="2">Longline</button>
+          <button class="chip active" data-idx="3">Other</button>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">State</label>
+        <select id="filter-state" multiple size="5">
+          <option value="">All states</option>
+        </select>
+      </div>
+
+      <button id="btn-reset-filters" class="reset-btn">Reset Filters</button>
+    </section>
+
+    <!-- Color coding -->
+    <section class="panel">
+      <h3>Color By</h3>
+      <select id="color-by">
+        <option value="speed">Speed</option>
+        <option value="gear">Gear Type</option>
+        <option value="species">Target Species</option>
+        <option value="fleet">Fleet</option>
+      </select>
+    </section>
+
+    <!-- Ports toggle -->
+    <section class="panel">
+      <label class="toggle-row">
+        <input type="checkbox" id="toggle-ports">
+        Show Major Ports
+      </label>
+    </section>
+
+    <!-- Vessel count -->
+    <div class="sidebar-footer">
+      <span id="filtered-count">—</span> / <span id="total-count">—</span> vessels visible
+    </div>
+
+  </aside>
+
+  <!-- Map (full viewport) -->
+  <div id="map"></div>
+
+  <!-- Vessel detail panel (slides in from right on click) -->
+  <div id="vessel-detail" class="hidden">
+    <button id="vessel-detail-close" title="Close">×</button>
+    <div class="vd-header">
+      <div id="vd-name" class="vd-title"></div>
+      <div id="vd-rnpa" class="vd-subtitle"></div>
+    </div>
+    <div class="vd-meta" id="vd-meta"></div>
+    <div class="vd-chart-title">Speed this month (knots)</div>
+    <div id="vd-chart"></div>
+  </div>
+
+  <!-- Loading overlay -->
+  <div id="loading">
+    <div class="spinner"></div>
+    <div id="loading-text">Loading...</div>
+  </div>
+
+  <!-- External libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4/dist/maplibre-gl.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.27/plotly.min.js"></script>
+
+  <!-- App modules -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

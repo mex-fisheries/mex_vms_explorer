@@ -1,0 +1,72 @@
+{
+  "months": [
+    {
+      "year": 2023,
+      "month": 1,
+      "n_vessels": 1189,
+      "n_records": 21922
+    },
+    {
+      "year": 2023,
+      "month": 3,
+      "n_vessels": 24,
+      "n_records": 196
+    },
+    {
+      "year": 2023,
+      "month": 4,
+      "n_vessels": 121,
+      "n_records": 2253
+    },
+    {
+      "year": 2023,
+      "month": 5,
+      "n_vessels": 153,
+      "n_records": 2477
+    },
+    {
+      "year": 2023,
+      "month": 6,
+      "n_vessels": 240,
+      "n_records": 3670
+    },
+    {
+      "year": 2023,
+      "month": 7,
+      "n_vessels": 342,
+      "n_records": 4978
+    },
+    {
+      "year": 2023,
+      "month": 8,
+      "n_vessels": 556,
+      "n_records": 8972
+    },
+    {
+      "year": 2023,
+      "month": 9,
+      "n_vessels": 1127,
+      "n_records": 16015
+    },
+    {
+      "year": 2023,
+      "month": 10,
+      "n_vessels": 1268,
+      "n_records": 27606
+    },
+    {
+      "year": 2023,
+      "month": 11,
+      "n_vessels": 1171,
+      "n_records": 22207
+    },
+    {
+      "year": 2023,
+      "month": 12,
+      "n_vessels": 1045,
+      "n_records": 19041
+    }
+  ],
+  "generated_at": "2026-04-03T21:18:05Z",
+  "year_range": [2023, 2023]
+}
