@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mexico Fishing Vessel Tracker</title>
+  <title>MEX VMS Explorer</title>
   <link href="https://cdn.jsdelivr.net/npm/maplibre-gl@4/dist/maplibre-gl.css" rel="stylesheet">
   <link href="css/app.css" rel="stylesheet">
 </head>
@@ -17,6 +17,7 @@
       <span class="sep">·</span>
       <span id="stat-vessels">—</span>
     </div>
+    <button id="lang-toggle" title="Switch language">EN</button>
   </header>
 
   <!-- Sidebar toggle button (mobile / collapsed state) -->
@@ -25,15 +26,24 @@
   <!-- Left sidebar: time controls + filters -->
   <aside id="sidebar">
 
+    <!-- Vessel search -->
+    <section class="panel">
+      <h3 data-i18n="searchVessel">Buscar embarcación</h3>
+      <div class="search-wrapper">
+        <input type="text" id="vessel-search" data-i18n-placeholder="searchPlaceholder" placeholder="Nombre de embarcación..." autocomplete="off">
+        <div id="vessel-search-results" class="search-results"></div>
+      </div>
+    </section>
+
     <!-- Month navigation -->
     <section class="panel">
-      <h3>Month</h3>
+      <h3 data-i18n="month">Mes</h3>
       <div id="month-nav"></div>
     </section>
 
     <!-- Playback controls -->
     <section class="panel">
-      <h3>Day <span id="day-label">1</span></h3>
+      <h3><span data-i18n="day">Día</span> <span id="day-label">1</span></h3>
       <div class="playback-row">
         <button class="icon-btn" id="btn-prev" title="Previous day">&#9664;</button>
         <button class="icon-btn" id="btn-play" title="Play/Pause">&#9654;</button>
@@ -41,7 +51,7 @@
       </div>
       <input type="range" id="day-scrubber" min="1" max="31" value="1">
       <div class="speed-row">
-        <label>Speed</label>
+        <label data-i18n="playbackSpeed">Velocidad</label>
         <select id="playback-speed">
           <option value="300">0.5×</option>
           <option value="150" selected>1×</option>
@@ -53,70 +63,54 @@
 
     <!-- Filters -->
     <section class="panel">
-      <h3>Filters <span id="filter-count"></span></h3>
+      <h3 data-i18n="filters">Filtros</h3>
 
       <div class="filter-group">
-        <label class="filter-label">Fleet</label>
-        <div class="chip-group" id="filter-fleet">
-          <button class="chip active" data-value="large scale">Large Scale</button>
-          <button class="chip active" data-value="small scale">Small Scale</button>
-        </div>
-      </div>
-
-      <div class="filter-group">
-        <label class="filter-label">Target Species</label>
+        <label class="filter-label" data-i18n="targetSpecies">Especie objetivo</label>
         <div class="chip-group" id="filter-species">
-          <button class="chip active" data-idx="0">Finfish</button>
-          <button class="chip active" data-idx="1">Sardine</button>
-          <button class="chip active" data-idx="2">Shark</button>
-          <button class="chip active" data-idx="3">Shrimp</button>
-          <button class="chip active" data-idx="4">Tuna</button>
-          <button class="chip active" data-idx="5">Other</button>
+          <button class="chip active" data-idx="0" data-i18n="finfish">Escama</button>
+          <button class="chip active" data-idx="1" data-i18n="sardine">Sardina</button>
+          <button class="chip active" data-idx="2" data-i18n="shark">Tiburón</button>
+          <button class="chip active" data-idx="3" data-i18n="shrimp">Camarón</button>
+          <button class="chip active" data-idx="4" data-i18n="tuna">Atún</button>
+          <button class="chip active" data-idx="5" data-i18n="other">Otro</button>
         </div>
       </div>
 
       <div class="filter-group">
-        <label class="filter-label">Gear Type</label>
+        <label class="filter-label" data-i18n="gearType">Arte de pesca</label>
         <div class="chip-group" id="filter-gear">
-          <button class="chip active" data-idx="0">Trawler</button>
-          <button class="chip active" data-idx="1">Purse Seine</button>
-          <button class="chip active" data-idx="2">Longline</button>
-          <button class="chip active" data-idx="3">Other</button>
+          <button class="chip active" data-idx="0" data-i18n="trawler">Arrastrero</button>
+          <button class="chip active" data-idx="1" data-i18n="purseSeine">Cerquero</button>
+          <button class="chip active" data-idx="2" data-i18n="longline">Palangrero</button>
+          <button class="chip active" data-idx="3" data-i18n="other">Otro</button>
         </div>
       </div>
 
-      <div class="filter-group">
-        <label class="filter-label">State</label>
-        <select id="filter-state" multiple size="5">
-          <option value="">All states</option>
-        </select>
-      </div>
-
-      <button id="btn-reset-filters" class="reset-btn">Reset Filters</button>
+      <button id="btn-reset-filters" class="reset-btn" data-i18n="resetFilters">Restablecer filtros</button>
     </section>
 
     <!-- Color coding -->
     <section class="panel">
-      <h3>Color By</h3>
+      <h3 data-i18n="colorBy">Color por</h3>
       <select id="color-by">
-        <option value="speed">Speed</option>
-        <option value="gear">Gear Type</option>
-        <option value="species">Target Species</option>
-        <option value="fleet">Fleet</option>
+        <option value="gear" data-i18n="colorGear" selected>Arte de pesca</option>
+        <option value="species" data-i18n="colorSpecies">Especie objetivo</option>
       </select>
     </section>
 
-    <!-- Ports toggle -->
+    <!-- Spatial layers -->
     <section class="panel">
+      <h3 data-i18n="spatialLayers">Otras capas espaciales</h3>
       <label class="toggle-row">
         <input type="checkbox" id="toggle-ports">
-        Show Major Ports
+        <span data-i18n="showPorts">Mostrar puertos principales</span>
       </label>
     </section>
 
     <!-- Vessel count -->
     <div class="sidebar-footer">
-      <span id="filtered-count">—</span> / <span id="total-count">—</span> vessels visible
+      <span id="filtered-count">—</span> / <span id="total-count">—</span> <span data-i18n="vesselsVisible">embarcaciones visibles</span>
     </div>
 
   </aside>
@@ -132,14 +126,15 @@
       <div id="vd-rnpa" class="vd-subtitle"></div>
     </div>
     <div class="vd-meta" id="vd-meta"></div>
-    <div class="vd-chart-title">Speed this month (knots)</div>
+    <div class="vd-chart-title" data-i18n="pingsChartTitle">Señales VMS por día</div>
     <div id="vd-chart"></div>
+    <div id="vd-download"></div>
   </div>
 
   <!-- Loading overlay -->
   <div id="loading">
     <div class="spinner"></div>
-    <div id="loading-text">Loading...</div>
+    <div id="loading-text" data-i18n="loadingData">Cargando datos...</div>
   </div>
 
   <!-- External libraries -->

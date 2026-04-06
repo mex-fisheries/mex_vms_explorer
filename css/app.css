@@ -55,6 +55,22 @@ html, body {
   align-items: center;
 }
 
+#lang-toggle {
+  margin-left: auto;
+  padding: 3px 10px;
+  background: var(--bg-panel2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+#lang-toggle:hover { background: var(--accent-dim); border-color: var(--accent); }
+
 .sep { opacity: 0.4; }
 
 /* --- Sidebar toggle (mobile) ----------------------------------------------- */
@@ -111,6 +127,59 @@ html, body {
   color: var(--text-dim);
   margin-bottom: 10px;
 }
+
+/* --- Vessel search --------------------------------------------------------- */
+.search-wrapper {
+  position: relative;
+}
+
+#vessel-search {
+  width: 100%;
+  background: var(--bg-panel2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+#vessel-search:focus { border-color: var(--accent); }
+
+#vessel-search::placeholder { color: var(--text-dim); opacity: 0.6; }
+
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-panel2);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+  display: none;
+}
+
+.search-results.open { display: block; }
+
+.search-result-item {
+  padding: 6px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+}
+
+.search-result-item:last-child { border-bottom: none; }
+.search-result-item:hover { background: var(--accent-dim); color: var(--text); }
+
+.search-result-item .result-name { color: var(--text); }
+.search-result-item .result-rnpa { font-size: 10px; color: var(--text-dim); margin-left: 6px; }
 
 /* --- Month navigation ------------------------------------------------------ */
 #month-nav {
@@ -219,19 +288,6 @@ html, body {
 }
 
 .chip:hover { border-color: var(--accent); }
-
-/* --- State selector -------------------------------------------------------- */
-#filter-state {
-  width: 100%;
-  background: var(--bg-panel2);
-  border: 1px solid var(--border);
-  color: var(--text);
-  border-radius: 4px;
-  padding: 4px;
-  font-size: 12px;
-}
-
-#filter-state option { padding: 2px 4px; }
 
 /* --- Reset button ---------------------------------------------------------- */
 .reset-btn {
@@ -383,7 +439,26 @@ html, body {
 
 #vd-chart {
   padding: 0 8px 14px;
+  height: 180px;
 }
+
+#vd-download {
+  padding: 0 14px 14px;
+}
+
+.download-btn {
+  width: 100%;
+  padding: 7px;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent);
+  color: var(--text);
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 12px;
+  transition: background 0.15s;
+}
+
+.download-btn:hover { background: var(--accent); color: #000; }
 
 /* --- Loading overlay ------------------------------------------------------- */
 #loading {

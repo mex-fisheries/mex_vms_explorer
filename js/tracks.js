@@ -8,15 +8,16 @@ const cache = new Map();  // key: "YYYY_MM" → decoded month object
 function buildDayIndex(data) {
   // data.vi, data.day, data.lat, data.lon, data.spd are parallel arrays
   const dayIndex = new Map();
-  const n = data.vi.length;
-  for (let i = 0; i < n; i++) {
+  const len = data.vi.length;
+  for (let i = 0; i < len; i++) {
     const day = data.day[i];
     if (!dayIndex.has(day)) dayIndex.set(day, []);
     dayIndex.get(day).push({
       vi:    data.vi[i],
       lat:   data.lat[i],
       lon:   data.lon[i],
-      speed: data.spd[i]
+      speed: data.spd[i],
+      n:     data.n ? data.n[i] : null
     });
   }
   return dayIndex;

@@ -109,13 +109,14 @@ walk(vms_files, function(f) {
     return(invisible(NULL))
   }
 
-  # Daily centroid: mean lat, lon, speed per vessel-day
+  # Daily centroid: mean lat, lon, speed, and ping count per vessel-day
   daily <- vms |>
     group_by(vessel_rnpa, day) |>
     summarise(
       lat = round(mean(lat, na.rm = TRUE), 4),
       lon = round(mean(lon, na.rm = TRUE), 4),
       spd = round(mean(speed, na.rm = TRUE), 1),
+      n   = n(),
       .groups = "drop"
     ) |>
     # Map RNPA to integer vessel index
@@ -132,7 +133,8 @@ walk(vms_files, function(f) {
     day      = as.integer(daily$day),
     lat      = daily$lat,
     lon      = daily$lon,
-    spd      = daily$spd
+    spd      = daily$spd,
+    n        = as.integer(daily$n)
   )
 
   write_json(out, out_f, auto_unbox = TRUE, pretty = FALSE)

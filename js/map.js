@@ -1,7 +1,7 @@
 // map.js — MapLibre GL setup and layer management
 
 import { State } from './app.js';
-import { speedToColor, rgbToHex, vesselColor } from './utils.js';
+import { vesselColor } from './utils.js';
 
 let map = null;
 let onVesselClick = null;
@@ -185,10 +185,7 @@ function _addInteractions() {
 // ----- Public API ------------------------------------------------------------
 
 // Compute the color string for a vessel record given current settings
-function computeColor(vessel, speed) {
-  if (State.colorBy === 'speed') {
-    return rgbToHex(speedToColor(speed));
-  }
+function computeColor(vessel) {
   return vesselColor(vessel, State.colorBy) || '#00b4d8';
 }
 
@@ -209,7 +206,7 @@ export function renderFrame(monthData, day, allowedVis, registry) {
     features.push({
       type: 'Feature',
       geometry: { type: 'Point', coordinates: [rec.lon, rec.lat] },
-      properties: { rnpa, speed: rec.speed, color: computeColor(vessel, rec.speed) }
+      properties: { rnpa, speed: rec.speed, color: computeColor(vessel) }
     });
   }
 

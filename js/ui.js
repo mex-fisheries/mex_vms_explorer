@@ -1,7 +1,8 @@
-// ui.js — Vessel detail panel, month nav, and topbar updates
+// ui.js — Vessel detail panel, month nav, topbar, search, CSV download
 
 import { State } from './app.js';
-import { MONTH_NAMES, GEAR_LABELS, SPECIES_LABELS, daysInMonth, formatDate } from './utils.js';
+import { t, getLang, speciesLabels, gearLabels } from './i18n.js';
+import { MONTH_NAMES, daysInMonth, formatDate } from './utils.js';
 
 // Build the month navigation buttons from the manifest
 export function buildMonthNav(manifest, onMonthSelect) {
@@ -19,7 +20,6 @@ export function buildMonthNav(manifest, onMonthSelect) {
     container.appendChild(btn);
   }
 
-  // Mark current month active
   updateActiveMonth();
 }
 
@@ -37,7 +37,7 @@ export function updateTopbar() {
   document.getElementById('stat-date').textContent =
     formatDate(State.currentYear, State.currentMonth, State.currentDay);
   document.getElementById('stat-vessels').textContent =
-    `${State.allowedVis?.size ?? '—'} vessels`;
+    `${State.allowedVis?.size ?? '—'} ${t('vessels')}`;
 }
 
 // Show the vessel detail side panel for the given RNPA
@@ -46,13 +46,10 @@ export function showVesselDetail(rnpa, vessel, trackPoints, year, month) {
   document.getElementById('vd-name').textContent  = vessel.name || rnpa;
   document.getElementById('vd-rnpa').textContent  = `RNPA: ${rnpa}`;
 
-  // Metadata rows
+  // Metadata rows — only Species and Gear
   const metaRows = [
-    ['Fleet',   vessel.fleet || '—'],
-    ['State',   vessel.state || '—'],
-    ['Port',    vessel.port  || '—'],
-    ['Species', _speciesLabel(vessel.target)],
-    ['Gear',    _gearLabel(vessel.gear)]
+    [t('species'), _speciesLabel(vessel.target)],
+    [t('gear'),    _gearLabel(vessel.gear)]
   ];
 
   const metaEl = document.getElementById('vd-meta');
@@ -60,18 +57,19 @@ export function showVesselDetail(rnpa, vessel, trackPoints, year, month) {
     `<div class="vd-row"><span class="vd-key">${k}</span><span class="vd-val">${v}</span></div>`
   ).join('');
 
-  // Speed chart
+  // Pings chart (x = day of month, y = number of VMS pings)
   if (trackPoints && trackPoints.length > 0) {
-    const days   = trackPoints.map(p => p.day);
-    const speeds = trackPoints.map(p => p.speed);
+    const days  = trackPoints.map(p => p.day);
+    const pings = trackPoints.map(p => p.n);
 
     const trace = {
       x: days,
-      y: speeds,
-      mode: 'lines+markers',
-      line: { color: '#00b4d8', width: 1.5 },
-      marker: { size: 4, color: '#00b4d8' },
-      hovertemplate: 'Day %{x}: %{y} kn<extra></extra>'
+      y: pings,
+      type: 'bar',
+      marker: { color: '#00b4d8' },
+      hovertemplate: getLang() === 'es'
+        ? 'Día %{x}: %{y} señales<extra></extra>'
+        : 'Day %{x}: %{y} pings<extra></extra>'
     };
 
     const layout = {
@@ -83,7 +81,9 @@ export function showVesselDetail(rnpa, vessel, trackPoints, year, month) {
         title: '',
         gridcolor: '#2a3448',
         zerolinecolor: '#2a3448',
-        tickfont: { color: '#7a8aa0', size: 9 }
+        tickfont: { color: '#7a8aa0', size: 9 },
+        range: [0.5, daysInMonth(year, month) + 0.5],
+        dtick: 5
       },
       yaxis: {
         title: '',
@@ -92,13 +92,25 @@ export function showVesselDetail(rnpa, vessel, trackPoints, year, month) {
         rangemode: 'tozero',
         tickfont: { color: '#7a8aa0', size: 9 }
       },
-      showlegend: false
+      showlegend: false,
+      bargap: 0.15
     };
 
     Plotly.react('vd-chart', [trace], layout, { responsive: true, displayModeBar: false });
   } else {
     document.getElementById('vd-chart').innerHTML =
-      '<div style="color:#7a8aa0;font-size:12px;padding:8px">No track data this month</div>';
+      `<div style="color:#7a8aa0;font-size:12px;padding:8px">${t('noTrackData')}</div>`;
+  }
+
+  // CSV download button
+  const downloadEl = document.getElementById('vd-download');
+  if (trackPoints && trackPoints.length > 0) {
+    downloadEl.innerHTML = `<button class="download-btn" id="btn-download-csv">${t('downloadCsv')}</button>`;
+    document.getElementById('btn-download-csv').addEventListener('click', () => {
+      _downloadCsv(rnpa, vessel, trackPoints, year, month);
+    });
+  } else {
+    downloadEl.innerHTML = '';
   }
 }
 
@@ -113,16 +125,96 @@ export function initSidebarToggle() {
   });
 }
 
+// --- Vessel search -----------------------------------------------------------
+
+export function initVesselSearch(registry, onSelect) {
+  const input = document.getElementById('vessel-search');
+  const results = document.getElementById('vessel-search-results');
+
+  // Build a flat list of { rnpa, name } for fast searching
+  const vessels = Object.entries(registry.vessels)
+    .map(([rnpa, v]) => ({ rnpa, name: v.name || rnpa }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  input.addEventListener('input', () => {
+    const query = input.value.trim().toLowerCase();
+    if (query.length < 2) {
+      results.classList.remove('open');
+      results.innerHTML = '';
+      return;
+    }
+
+    const matches = vessels
+      .filter(v => v.name.toLowerCase().includes(query))
+      .slice(0, 10);
+
+    if (matches.length === 0) {
+      results.innerHTML = `<div class="search-result-item" style="cursor:default;color:var(--text-dim)">${t('noMatches')}</div>`;
+      results.classList.add('open');
+      return;
+    }
+
+    results.innerHTML = matches.map(v =>
+      `<div class="search-result-item" data-rnpa="${v.rnpa}"><span class="result-name">${_escapeHtml(v.name)}</span><span class="result-rnpa">${v.rnpa}</span></div>`
+    ).join('');
+    results.classList.add('open');
+
+    results.querySelectorAll('.search-result-item[data-rnpa]').forEach(el => {
+      el.addEventListener('click', () => {
+        onSelect(el.dataset.rnpa);
+        input.value = '';
+        results.classList.remove('open');
+        results.innerHTML = '';
+      });
+    });
+  });
+
+  // Close results when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!input.contains(e.target) && !results.contains(e.target)) {
+      results.classList.remove('open');
+    }
+  });
+}
+
 // --- Helpers -----------------------------------------------------------------
 
 function _speciesLabel(target) {
   if (!target) return '—';
-  const active = SPECIES_LABELS.filter((_, i) => target[i] === 1);
+  const labels = speciesLabels();
+  const active = labels.filter((_, i) => target[i] === 1);
   return active.length ? active.join(', ') : '—';
 }
 
 function _gearLabel(gear) {
   if (!gear) return '—';
-  const active = GEAR_LABELS.filter((_, i) => gear[i] === 1);
+  const labels = gearLabels();
+  const active = labels.filter((_, i) => gear[i] === 1);
   return active.length ? active.join(', ') : '—';
+}
+
+function _escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function _downloadCsv(rnpa, vessel, trackPoints, year, month) {
+  const header = 'date,lat,lon,speed_knots,n_pings';
+  const rows = trackPoints.map(p => {
+    const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(p.day).padStart(2,'0')}`;
+    return `${dateStr},${p.lat},${p.lon},${p.speed},${p.n}`;
+  });
+  const csv = [header, ...rows].join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const name = (vessel.name || rnpa).replace(/[^a-zA-Z0-9]/g, '_');
+  a.href = url;
+  a.download = `${name}_${year}_${String(month).padStart(2,'0')}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }

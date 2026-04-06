@@ -1,6 +1,6 @@
 // animation.js — Day-level playback engine
 
-import { State } from './app.js';
+import { State, monthExists } from './app.js';
 import { daysInMonth } from './utils.js';
 
 let rafId = null;
@@ -57,12 +57,14 @@ async function advance(delta) {
   let newDay = State.currentDay + delta;
 
   if (newDay > maxDay) {
-    // Move to next month
-    await changeMonth(+1);
+    // Check if next month exists before advancing
+    const changed = await changeMonth(+1);
+    if (!changed) { stopPlayback(); return; }
     newDay = 1;
   } else if (newDay < 1) {
-    // Move to previous month
-    await changeMonth(-1);
+    // Check if previous month exists before going back
+    const changed = await changeMonth(-1);
+    if (!changed) { stopPlayback(); return; }
     newDay = daysInMonth(State.currentYear, State.currentMonth);
   }
 
@@ -71,11 +73,16 @@ async function advance(delta) {
   onStep(State.currentYear, State.currentMonth, State.currentDay);
 }
 
+// Returns true if the month change succeeded, false if the target month doesn't exist
 async function changeMonth(delta) {
   let m = State.currentMonth + delta;
   let y = State.currentYear;
   if (m > 12) { m = 1;  y++; }
   if (m < 1)  { m = 12; y--; }
+
+  // Don't advance if the target month isn't in the manifest
+  if (!monthExists(y, m)) return false;
+
   State.currentMonth = m;
   State.currentYear  = y;
 
@@ -93,6 +100,7 @@ async function changeMonth(delta) {
       rafId = requestAnimationFrame(loop);
     }
   }
+  return true;
 }
 
 export function updateScrubber() {
