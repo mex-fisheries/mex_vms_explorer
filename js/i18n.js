@@ -43,6 +43,12 @@ const translations = {
   downloadCsv:    { es: 'Descargar track (CSV)', en: 'Download track (CSV)' },
   noTrackData:    { es: 'Sin datos de rastreo este mes', en: 'No track data this month' },
 
+  // Data note
+  dataNoteHtml: {
+    es: 'Todos los datos son públicos y están disponibles en BigQuery en <code>mex-fisheries.mex_vms</code>, y también en el <a href="https://mex-fisheries.github.io/mex-fisheries/es/" target="_blank">sitio web</a>. Una guía para acceder a los datos está disponible <a href="https://mex-fisheries.github.io/mex_vms/#accessing-the-data-via-r" target="_blank">aquí</a>. Para más información sobre el proyecto, contacte a <a href="https://human-ocean-systems.org/" target="_blank">Juan Carlos Villaseñor-Derbez</a>.',
+    en: 'All data are publicly available in BigQuery at <code>mex-fisheries.mex_vms</code>, and also at the <a href="https://mex-fisheries.github.io/mex-fisheries/es/" target="_blank">website</a>. A guide on how to access them is available <a href="https://mex-fisheries.github.io/mex_vms/#accessing-the-data-via-r" target="_blank">here</a>. For further questions about the project you may contact <a href="https://human-ocean-systems.org/" target="_blank">Juan Carlos Villaseñor-Derbez</a>.'
+  },
+
   // Color-by options
   colorGear:    { es: 'Arte de pesca', en: 'Gear Type' },
   colorSpecies: { es: 'Especie objetivo', en: 'Target Species' },
@@ -80,6 +86,10 @@ export function applyTranslations() {
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
     const key = el.getAttribute('data-i18n-placeholder');
     el.placeholder = t(key);
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.getAttribute('data-i18n-html');
+    el.innerHTML = t(key);
   });
 }
 

@@ -460,6 +460,28 @@ html, body {
 
 .download-btn:hover { background: var(--accent); color: #000; }
 
+.vd-data-note {
+  padding: 10px 14px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-dim);
+  border-top: 1px solid var(--border);
+}
+
+.vd-data-note a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.vd-data-note a:hover { text-decoration: underline; }
+
+.vd-data-note code {
+  background: var(--bg-panel2);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 10px;
+}
+
 /* --- Loading overlay ------------------------------------------------------- */
 #loading {
   position: fixed;

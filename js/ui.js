@@ -112,6 +112,9 @@ export function showVesselDetail(rnpa, vessel, trackPoints, year, month) {
   } else {
     downloadEl.innerHTML = '';
   }
+
+  // Data note
+  document.getElementById('vd-data-note').innerHTML = t('dataNoteHtml');
 }
 
 export function hideVesselDetail() {
