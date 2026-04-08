@@ -17,7 +17,7 @@ export function initMap(clickCallback) {
       sources: {
         basemap: {
           type: 'raster',
-          tiles: ['https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png'],
+          tiles: ['https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png'],
           tileSize: 256,
           attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>'
         }
@@ -69,7 +69,7 @@ function _addVesselLayers() {
       'circle-color': ['get', 'color'],
       'circle-opacity': 0.85,
       'circle-stroke-width': 0.5,
-      'circle-stroke-color': 'rgba(0,0,0,0.4)'
+      'circle-stroke-color': 'rgba(0,0,0,0.15)'
     }
   });
 
@@ -89,7 +89,7 @@ function _addVesselLayers() {
       'circle-color': ['get', 'color'],
       'circle-opacity': 1,
       'circle-stroke-width': 2,
-      'circle-stroke-color': '#ffffff'
+      'circle-stroke-color': '#1a1d23'
     }
   });
 }
@@ -106,7 +106,7 @@ function _addTrackLayers() {
     source: 'track-line',
     layout: { 'line-join': 'round', 'line-cap': 'round' },
     paint: {
-      'line-color': '#ffffff',
+      'line-color': '#4b5563',
       'line-width': 1.5,
       'line-opacity': 0.5,
       'line-dasharray': [2, 2]
@@ -124,10 +124,10 @@ function _addTrackLayers() {
     source: 'track-dots',
     paint: {
       'circle-radius': 3,
-      'circle-color': '#ffffff',
+      'circle-color': '#4b5563',
       'circle-opacity': 0.6,
       'circle-stroke-width': 1,
-      'circle-stroke-color': 'rgba(0,0,0,0.5)'
+      'circle-stroke-color': 'rgba(0,0,0,0.2)'
     }
   });
 }
@@ -145,10 +145,10 @@ function _addPortLayer() {
     layout: { visibility: 'none' },
     paint: {
       'circle-radius': 5,
-      'circle-color': '#f1c40f',
+      'circle-color': '#fbbf24',
       'circle-opacity': 0.8,
       'circle-stroke-width': 1,
-      'circle-stroke-color': 'rgba(0,0,0,0.6)'
+      'circle-stroke-color': 'rgba(0,0,0,0.25)'
     }
   });
 
@@ -186,7 +186,7 @@ function _addInteractions() {
 
 // Compute the color string for a vessel record given current settings
 function computeColor(vessel) {
-  return vesselColor(vessel, State.colorBy) || '#00b4d8';
+  return vesselColor(vessel, State.colorBy) || '#34d399';
 }
 
 // Render all vessel positions for the current day

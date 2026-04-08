@@ -3,10 +3,10 @@
 import { getLang } from './i18n.js';
 
 // Gear colors: [trawler, purse_seine, longline, other]
-export const GEAR_COLORS = ['#e67e22', '#3498db', '#2ecc71', '#95a5a6'];
+export const GEAR_COLORS = ['#f59e42', '#e05283', '#a78bfa', '#8b9daa'];
 
 // Species colors: [finfish, sardine, shark, shrimp, tuna, other]
-export const SPECIES_COLORS = ['#e74c3c', '#f39c12', '#9b59b6', '#e67e22', '#1abc9c', '#7f8c8d'];
+export const SPECIES_COLORS = ['#f59e42', '#e8d44d', '#e05283', '#f07c5a', '#a78bfa', '#8b9daa'];
 
 // Month names
 export const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];

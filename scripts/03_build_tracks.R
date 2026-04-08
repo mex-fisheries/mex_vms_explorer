@@ -90,13 +90,14 @@ walk(vms_files, function(f) {
                     datetime    = col_character()
                   ))
 
-  # Extract day of month from datetime
+  # Extract day of month from datetime (suppress warnings for unparseable values)
   vms <- vms |>
     mutate(
-      day = as.integer(format(as.POSIXct(datetime, tz = "UTC"), "%d"))
+      day = as.integer(day(ymd_hms(datetime, quiet = TRUE)))
     ) |>
-    # Remove out-of-bounds coordinates (data quality filter)
+    # Remove rows with unparseable datetime or out-of-bounds coordinates
     filter(
+      !is.na(day),
       between(lat, LAT_MIN, LAT_MAX),
       between(lon, LON_MIN, LON_MAX),
       !is.na(speed)

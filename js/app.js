@@ -3,8 +3,8 @@
 import { initMap, renderFrame, renderTrack, clearTrack, loadPorts, setPortsVisible, isReady } from './map.js';
 import { loadMonth } from './tracks.js';
 import { applyFilters, initFilterControls, updateFilterCount, resetFilters } from './filters.js';
-import { initAnimation, updateScrubber, stopPlayback } from './animation.js';
-import { buildMonthNav, updateActiveMonth, updateTopbar, showVesselDetail, hideVesselDetail, initSidebarToggle, initVesselSearch } from './ui.js';
+import { initAnimation, updateSlider, stopPlayback } from './animation.js';
+import { updateTopbar, showVesselDetail, hideVesselDetail, initSidebarToggle, initVesselSearch } from './ui.js';
 import { daysInMonth } from './utils.js';
 import { setLang, getLang, applyTranslations, t } from './i18n.js';
 
@@ -18,6 +18,9 @@ export const State = {
   currentYear:  null,
   currentMonth: null,
   currentDay:   1,
+
+  dateRange:    [],   // flat array of { year, month, day }
+  dateIndex:    0,    // current position in dateRange
 
   allowedVis:   new Set(),
   selectedRnpa: null,
@@ -39,6 +42,17 @@ export function monthExists(year, month) {
   return State.manifest.months.some(m => m.year === year && m.month === month);
 }
 
+function buildDateRange(manifest) {
+  const range = [];
+  for (const m of manifest.months) {
+    const maxDay = daysInMonth(m.year, m.month);
+    for (let d = 1; d <= maxDay; d++) {
+      range.push({ year: m.year, month: m.month, day: d });
+    }
+  }
+  return range;
+}
+
 // --- Boot -------------------------------------------------------------------
 async function boot() {
   setLoading(t('loadingData'));
@@ -54,9 +68,12 @@ async function boot() {
     State.registry = registry;
     State.ports    = ports;
 
+    // Build the continuous date range from manifest
+    State.dateRange = buildDateRange(manifest);
+    State.dateIndex = 0;
+
     await initMapAsync();
 
-    buildMonthNav(manifest, selectMonth);
     initFilterControls(onFilterChange);
     initAnimation(onDayStep, onMonthChange);
     initVesselSearch(registry, onVesselClick);
@@ -78,14 +95,22 @@ async function boot() {
       setLang(next);
       document.getElementById('lang-toggle').textContent = next === 'es' ? 'EN' : 'ES';
       updateTopbar();
+      updateSlider();  // refresh date label in new language
     });
 
     loadPorts(ports);
     applyTranslations();
 
-    const firstMonth = manifest.months[0];
-    await selectMonth(firstMonth.year, firstMonth.month);
+    // Load the first available month
+    const first = State.dateRange[0];
+    State.currentYear  = first.year;
+    State.currentMonth = first.month;
+    State.currentDay   = first.day;
+    State.monthData    = await loadMonth(first.year, first.month);
+    prefetchAdjacent(first.year, first.month);
 
+    onFilterChange();
+    updateSlider();
     hideLoading();
 
   } catch (err) {
@@ -102,26 +127,19 @@ function initMapAsync() {
   });
 }
 
-// --- Month selection ---------------------------------------------------------
-async function selectMonth(year, month) {
-  stopPlayback();
+// --- Month change callback (from animation.js) ------------------------------
+async function onMonthChange(year, month) {
   setLoading(`${t('loadingMonth')} ${year}/${String(month).padStart(2,'0')}...`);
 
   try {
-    State.currentYear  = year;
-    State.currentMonth = month;
-    State.currentDay   = 1;
-    State.selectedRnpa = null;
-    State.selectedVi   = null;
-
     State.monthData = await loadMonth(year, month);
     prefetchAdjacent(year, month);
 
     clearTrack();
     hideVesselDetail();
+    State.selectedRnpa = null;
+    State.selectedVi   = null;
     onFilterChange();
-    updateActiveMonth();
-    updateScrubber();
     hideLoading();
 
   } catch (err) {
@@ -142,10 +160,6 @@ function onDayStep(year, month, day) {
   if (!State.monthData) return;
   renderFrame(State.monthData, day, State.allowedVis, State.registry);
   updateTopbar();
-}
-
-async function onMonthChange(year, month) {
-  await selectMonth(year, month);
 }
 
 // --- Filter callback ---------------------------------------------------------
@@ -175,7 +189,7 @@ function onVesselClick(rnpa) {
 
   renderTrack(State.monthData, State.selectedVi, State.registry);
 
-  // Collect track data including hours for the detail chart
+  // Collect track data for the detail chart
   const trackPoints = [];
   if (State.monthData) {
     const sortedDays = [...State.monthData.dayIndex.keys()].sort((a, b) => a - b);

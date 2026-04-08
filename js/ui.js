@@ -2,35 +2,7 @@
 
 import { State } from './app.js';
 import { t, getLang, speciesLabels, gearLabels } from './i18n.js';
-import { MONTH_NAMES, daysInMonth, formatDate } from './utils.js';
-
-// Build the month navigation buttons from the manifest
-export function buildMonthNav(manifest, onMonthSelect) {
-  const container = document.getElementById('month-nav');
-  container.innerHTML = '';
-
-  for (const m of manifest.months) {
-    const btn = document.createElement('button');
-    btn.className = 'month-btn';
-    btn.dataset.year  = m.year;
-    btn.dataset.month = m.month;
-    btn.textContent   = MONTH_NAMES[m.month - 1];
-    btn.title = `${MONTH_NAMES[m.month - 1]} ${m.year} — ${m.n_vessels} vessels`;
-    btn.addEventListener('click', () => onMonthSelect(m.year, m.month));
-    container.appendChild(btn);
-  }
-
-  updateActiveMonth();
-}
-
-export function updateActiveMonth() {
-  document.querySelectorAll('.month-btn').forEach(btn => {
-    const active =
-      parseInt(btn.dataset.year)  === State.currentYear &&
-      parseInt(btn.dataset.month) === State.currentMonth;
-    btn.classList.toggle('active', active);
-  });
-}
+import { daysInMonth, formatDate } from './utils.js';
 
 // Update the top bar stats line
 export function updateTopbar() {
@@ -66,7 +38,7 @@ export function showVesselDetail(rnpa, vessel, trackPoints, year, month) {
       x: days,
       y: pings,
       type: 'bar',
-      marker: { color: '#00b4d8' },
+      marker: { color: '#34d399' },
       hovertemplate: getLang() === 'es'
         ? 'Día %{x}: %{y} señales<extra></extra>'
         : 'Day %{x}: %{y} pings<extra></extra>'
@@ -76,21 +48,21 @@ export function showVesselDetail(rnpa, vessel, trackPoints, year, month) {
       margin: { t: 4, r: 10, b: 30, l: 35 },
       paper_bgcolor: 'transparent',
       plot_bgcolor: 'transparent',
-      font: { color: '#7a8aa0', size: 10 },
+      font: { color: '#5f6b7a', size: 10 },
       xaxis: {
         title: '',
-        gridcolor: '#2a3448',
-        zerolinecolor: '#2a3448',
-        tickfont: { color: '#7a8aa0', size: 9 },
+        gridcolor: '#d0d5dd',
+        zerolinecolor: '#d0d5dd',
+        tickfont: { color: '#5f6b7a', size: 9 },
         range: [0.5, daysInMonth(year, month) + 0.5],
         dtick: 5
       },
       yaxis: {
         title: '',
-        gridcolor: '#2a3448',
-        zerolinecolor: '#2a3448',
+        gridcolor: '#d0d5dd',
+        zerolinecolor: '#d0d5dd',
         rangemode: 'tozero',
-        tickfont: { color: '#7a8aa0', size: 9 }
+        tickfont: { color: '#5f6b7a', size: 9 }
       },
       showlegend: false,
       bargap: 0.15
@@ -99,7 +71,7 @@ export function showVesselDetail(rnpa, vessel, trackPoints, year, month) {
     Plotly.react('vd-chart', [trace], layout, { responsive: true, displayModeBar: false });
   } else {
     document.getElementById('vd-chart').innerHTML =
-      `<div style="color:#7a8aa0;font-size:12px;padding:8px">${t('noTrackData')}</div>`;
+      `<div style="color:#5f6b7a;font-size:12px;padding:8px">${t('noTrackData')}</div>`;
   }
 
   // CSV download button

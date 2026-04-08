@@ -1,16 +1,16 @@
 /* ============================================================
-   MEX VMS Explorer — Dark theme
+   MEX VMS Explorer — Light theme
    ============================================================ */
 
 :root {
-  --bg-dark:    #0d1117;
-  --bg-panel:   #161b27;
-  --bg-panel2:  #1c2333;
-  --border:     #2a3448;
-  --accent:     #00b4d8;
-  --accent-dim: #0077a8;
-  --text:       #e0e6f0;
-  --text-dim:   #7a8aa0;
+  --bg-dark:    #f5f6f8;
+  --bg-panel:   #ffffff;
+  --bg-panel2:  #eef0f4;
+  --border:     #d0d5dd;
+  --accent:     #34d399;
+  --accent-dim: #1a8a62;
+  --text:       #1a1d23;
+  --text-dim:   #5f6b7a;
   --topbar-h:   44px;
   --sidebar-w:  280px;
 }
@@ -181,29 +181,6 @@ html, body {
 .search-result-item .result-name { color: var(--text); }
 .search-result-item .result-rnpa { font-size: 10px; color: var(--text-dim); margin-left: 6px; }
 
-/* --- Month navigation ------------------------------------------------------ */
-#month-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.month-btn {
-  padding: 4px 8px;
-  border-radius: 4px;
-  border: 1px solid var(--border);
-  background: var(--bg-panel2);
-  color: var(--text-dim);
-  cursor: pointer;
-  font-size: 11px;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-  min-width: 36px;
-  text-align: center;
-}
-
-.month-btn:hover { background: var(--bg-panel2); border-color: var(--accent); color: var(--text); }
-.month-btn.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 700; }
-
 /* --- Playback controls ----------------------------------------------------- */
 .playback-row {
   display: flex;
@@ -226,7 +203,7 @@ html, body {
 .icon-btn:hover { background: var(--accent-dim); border-color: var(--accent); }
 .icon-btn.playing { background: var(--accent); color: #000; border-color: var(--accent); }
 
-#day-scrubber {
+#date-slider {
   width: 100%;
   accent-color: var(--accent);
   margin-bottom: 8px;
@@ -486,7 +463,7 @@ html, body {
 #loading {
   position: fixed;
   inset: 0;
-  background: rgba(13, 17, 23, 0.85);
+  background: rgba(245, 246, 248, 0.85);
   display: flex;
   flex-direction: column;
   align-items: center;

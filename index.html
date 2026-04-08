@@ -35,28 +35,22 @@
       </div>
     </section>
 
-    <!-- Month navigation -->
-    <section class="panel">
-      <h3 data-i18n="month">Mes</h3>
-      <div id="month-nav"></div>
-    </section>
-
     <!-- Playback controls -->
     <section class="panel">
-      <h3><span data-i18n="day">Día</span> <span id="day-label">1</span></h3>
+      <h3><span data-i18n="date">Fecha</span> <span id="date-label">—</span></h3>
       <div class="playback-row">
         <button class="icon-btn" id="btn-prev" title="Previous day">&#9664;</button>
         <button class="icon-btn" id="btn-play" title="Play/Pause">&#9654;</button>
         <button class="icon-btn" id="btn-next" title="Next day">&#9654;&#9654;</button>
       </div>
-      <input type="range" id="day-scrubber" min="1" max="31" value="1">
+      <input type="range" id="date-slider" min="0" max="0" value="0">
       <div class="speed-row">
         <label data-i18n="playbackSpeed">Velocidad</label>
         <select id="playback-speed">
-          <option value="300">0.5×</option>
-          <option value="150" selected>1×</option>
-          <option value="75">2×</option>
-          <option value="35">4×</option>
+          <option value="300">0.5&times;</option>
+          <option value="150" selected>1&times;</option>
+          <option value="75">2&times;</option>
+          <option value="35">4&times;</option>
         </select>
       </div>
     </section>

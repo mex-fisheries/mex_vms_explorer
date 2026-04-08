@@ -1,31 +1,63 @@
-// animation.js — Day-level playback engine
+// animation.js — Day-level playback engine using absolute date index
 
-import { State, monthExists } from './app.js';
-import { daysInMonth } from './utils.js';
+import { State } from './app.js';
+import { formatDate } from './utils.js';
 
 let rafId = null;
 let lastStepTime = 0;
-let onStep = null;    // callback: (year, month, day) → void
-let onMonthChange = null;  // async callback: (year, month) → void
+let onStep = null;        // callback: (year, month, day) → void
+let onMonthChange = null; // async callback: (year, month) → void
 
 export function initAnimation(stepCb, monthChangeCb) {
-  onStep       = stepCb;
+  onStep        = stepCb;
   onMonthChange = monthChangeCb;
 
   document.getElementById('btn-play').addEventListener('click', togglePlay);
   document.getElementById('btn-prev').addEventListener('click', () => advance(-1));
   document.getElementById('btn-next').addEventListener('click', () => advance(+1));
 
-  const scrubber = document.getElementById('day-scrubber');
-  scrubber.addEventListener('input', () => {
-    State.currentDay = parseInt(scrubber.value);
-    updateDayLabel();
-    onStep(State.currentYear, State.currentMonth, State.currentDay);
+  const slider = document.getElementById('date-slider');
+  slider.addEventListener('input', () => {
+    goToIndex(parseInt(slider.value));
   });
 
   document.getElementById('playback-speed').addEventListener('change', (e) => {
     State.playbackSpeed = parseInt(e.target.value);
   });
+}
+
+async function goToIndex(idx) {
+  if (idx < 0 || idx >= State.dateRange.length) return;
+
+  const entry = State.dateRange[idx];
+  const monthChanged = entry.year !== State.currentYear || entry.month !== State.currentMonth;
+
+  State.dateIndex  = idx;
+  State.currentDay = entry.day;
+
+  if (monthChanged) {
+    State.currentYear  = entry.year;
+    State.currentMonth = entry.month;
+
+    if (onMonthChange) {
+      const wasPlaying = State.isPlaying;
+      if (wasPlaying) {
+        State.isPlaying = false;
+        cancelAnimationFrame(rafId);
+      }
+
+      await onMonthChange(entry.year, entry.month);
+
+      if (wasPlaying) {
+        State.isPlaying = true;
+        lastStepTime = 0;
+        rafId = requestAnimationFrame(loop);
+      }
+    }
+  }
+
+  updateSlider();
+  onStep(State.currentYear, State.currentMonth, State.currentDay);
 }
 
 function togglePlay() {
@@ -45,74 +77,37 @@ function togglePlay() {
 }
 
 function loop(timestamp) {
+  if (!State.isPlaying) return;
   if (timestamp - lastStepTime >= State.playbackSpeed) {
     lastStepTime = timestamp;
     advance(+1);
   }
-  rafId = requestAnimationFrame(loop);
+  if (State.isPlaying) {
+    rafId = requestAnimationFrame(loop);
+  }
 }
 
 async function advance(delta) {
-  const maxDay = daysInMonth(State.currentYear, State.currentMonth);
-  let newDay = State.currentDay + delta;
-
-  if (newDay > maxDay) {
-    // Check if next month exists before advancing
-    const changed = await changeMonth(+1);
-    if (!changed) { stopPlayback(); return; }
-    newDay = 1;
-  } else if (newDay < 1) {
-    // Check if previous month exists before going back
-    const changed = await changeMonth(-1);
-    if (!changed) { stopPlayback(); return; }
-    newDay = daysInMonth(State.currentYear, State.currentMonth);
+  const newIdx = State.dateIndex + delta;
+  if (newIdx < 0 || newIdx >= State.dateRange.length) {
+    stopPlayback();
+    return;
   }
-
-  State.currentDay = newDay;
-  updateScrubber();
-  onStep(State.currentYear, State.currentMonth, State.currentDay);
+  await goToIndex(newIdx);
 }
 
-// Returns true if the month change succeeded, false if the target month doesn't exist
-async function changeMonth(delta) {
-  let m = State.currentMonth + delta;
-  let y = State.currentYear;
-  if (m > 12) { m = 1;  y++; }
-  if (m < 1)  { m = 12; y--; }
-
-  // Don't advance if the target month isn't in the manifest
-  if (!monthExists(y, m)) return false;
-
-  State.currentMonth = m;
-  State.currentYear  = y;
-
-  if (onMonthChange) {
-    // Pause during load to avoid rendering with stale data
-    const wasPlaying = State.isPlaying;
-    if (wasPlaying) {
-      State.isPlaying = false;
-      cancelAnimationFrame(rafId);
-    }
-    await onMonthChange(y, m);
-    if (wasPlaying) {
-      State.isPlaying = true;
-      lastStepTime = 0;
-      rafId = requestAnimationFrame(loop);
-    }
-  }
-  return true;
+export function updateSlider() {
+  const slider = document.getElementById('date-slider');
+  slider.max   = State.dateRange.length - 1;
+  slider.value = State.dateIndex;
+  updateDateLabel();
 }
 
-export function updateScrubber() {
-  const scrubber = document.getElementById('day-scrubber');
-  const maxDay = daysInMonth(State.currentYear, State.currentMonth);
-  scrubber.max   = maxDay;
-  scrubber.value = State.currentDay;
-  updateDayLabel();
-}
-
-function updateDayLabel() {
-  document.getElementById('day-label').textContent = State.currentDay;
+function updateDateLabel() {
+  const entry = State.dateRange[State.dateIndex];
+  if (!entry) return;
+  document.getElementById('date-label').textContent =
+    formatDate(entry.year, entry.month, entry.day);
 }
 
 export function stopPlayback() {
