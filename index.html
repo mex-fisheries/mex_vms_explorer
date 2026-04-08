@@ -39,7 +39,7 @@
     <section class="panel">
       <h3><span data-i18n="date">Fecha</span> <span id="date-label">—</span></h3>
       <div class="playback-row">
-        <button class="icon-btn" id="btn-prev" title="Previous day">&#9664;</button>
+        <button class="icon-btn" id="btn-prev" title="Previous day">&#9664;&#9664;</button>
         <button class="icon-btn" id="btn-play" title="Play/Pause">&#9654;</button>
         <button class="icon-btn" id="btn-next" title="Next day">&#9654;&#9654;</button>
       </div>
@@ -100,6 +100,19 @@
         <input type="checkbox" id="toggle-ports">
         <span data-i18n="showPorts">Mostrar puertos principales</span>
       </label>
+      <label class="toggle-row">
+        <input type="checkbox" id="toggle-mpas">
+        <span data-i18n="showMpas">Mostrar áreas marinas protegidas</span>
+      </label>
+      <label class="toggle-row">
+        <input type="checkbox" id="toggle-regions">
+        <span data-i18n="showRegions">Mostrar regiones pesqueras</span>
+      </label>
+    </section>
+
+    <!-- Data caveats -->
+    <section class="panel data-caveat">
+      <p data-i18n-html="dataCaveatsHtml">Los puntos representan la posición media diaria (centroide) de cada embarcación. Las trayectorias conectan los centroides diarios dentro de un mes.</p>
     </section>
 
     <!-- Vessel count -->

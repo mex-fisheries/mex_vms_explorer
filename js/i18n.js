@@ -20,6 +20,8 @@ const translations = {
   resetFilters:   { es: 'Restablecer filtros', en: 'Reset Filters' },
   spatialLayers:  { es: 'Otras capas espaciales', en: 'Other spatial layers' },
   showPorts:      { es: 'Mostrar puertos principales', en: 'Show Major Ports' },
+  showMpas:       { es: 'Mostrar áreas marinas protegidas', en: 'Show Marine Protected Areas' },
+  showRegions:    { es: 'Mostrar regiones pesqueras', en: 'Show Fishing Regions' },
   vesselsVisible: { es: 'embarcaciones visibles', en: 'vessels visible' },
 
   // Species labels
@@ -41,6 +43,12 @@ const translations = {
   pingsChartTitle:{ es: 'Señales VMS por día', en: 'VMS pings by day' },
   downloadCsv:    { es: 'Descargar track (CSV)', en: 'Download track (CSV)' },
   noTrackData:    { es: 'Sin datos de rastreo este mes', en: 'No track data this month' },
+
+  // Caveats
+  dataCaveatsHtml: {
+    es: 'Los puntos representan la posición media diaria (centroide) de cada embarcación. Las trayectorias conectan los centroides diarios dentro de un mes.',
+    en: 'Points represent the daily mean position (centroid) of each vessel. Tracks connect daily centroids within a month.'
+  },
 
   // Data note
   dataNoteHtml: {

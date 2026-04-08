@@ -1,6 +1,6 @@
 // app.js — Application state and boot sequence
 
-import { initMap, renderFrame, renderTrack, clearTrack, loadPorts, setPortsVisible, isReady } from './map.js';
+import { initMap, renderFrame, renderTrack, clearTrack, loadPorts, setPortsVisible, loadMpas, setMpasVisible, loadFishingRegions, setFishingRegionsVisible, isReady } from './map.js';
 import { loadMonth } from './tracks.js';
 import { applyFilters, initFilterControls, updateFilterCount, resetFilters } from './filters.js';
 import { initAnimation, updateSlider, stopPlayback } from './animation.js';
@@ -58,10 +58,12 @@ async function boot() {
   setLoading(t('loadingData'));
 
   try {
-    const [manifest, registry, ports] = await Promise.all([
+    const [manifest, registry, ports, mpasGeojson, regionsGeojson] = await Promise.all([
       fetch('data/manifest.json').then(r => r.json()),
       fetch('data/vessel_registry.json').then(r => r.json()),
-      fetch('data/ports.json').then(r => r.json()).catch(() => [])
+      fetch('data/ports.json').then(r => r.json()).catch(() => []),
+      fetch('data/mpas.json').then(r => r.json()).catch(() => null),
+      fetch('data/fishing_regions.json').then(r => r.json()).catch(() => null)
     ]);
 
     State.manifest = manifest;
@@ -84,9 +86,15 @@ async function boot() {
       deselectVessel();
     });
 
-    // Ports toggle
+    // Spatial layer toggles
     document.getElementById('toggle-ports').addEventListener('change', (e) => {
       setPortsVisible(e.target.checked);
+    });
+    document.getElementById('toggle-mpas').addEventListener('change', (e) => {
+      setMpasVisible(e.target.checked);
+    });
+    document.getElementById('toggle-regions').addEventListener('change', (e) => {
+      setFishingRegionsVisible(e.target.checked);
     });
 
     // Language toggle
@@ -99,6 +107,8 @@ async function boot() {
     });
 
     loadPorts(ports);
+    if (mpasGeojson) loadMpas(mpasGeojson);
+    if (regionsGeojson) loadFishingRegions(regionsGeojson);
     applyTranslations();
 
     // Load the first available month

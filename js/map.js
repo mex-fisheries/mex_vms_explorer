@@ -35,6 +35,7 @@ export function initMap(clickCallback) {
   });
 
   map.on('load', () => {
+    _addPolygonLayers();
     _addVesselLayers();
     _addTrackLayers();
     _addPortLayer();
@@ -128,6 +129,62 @@ function _addTrackLayers() {
       'circle-opacity': 0.6,
       'circle-stroke-width': 1,
       'circle-stroke-color': 'rgba(0,0,0,0.2)'
+    }
+  });
+}
+
+function _addPolygonLayers() {
+  // MPAs — filled polygons (added before vessel layers so vessels draw on top)
+  map.addSource('mpas', {
+    type: 'geojson',
+    data: { type: 'FeatureCollection', features: [] }
+  });
+  map.addLayer({
+    id: 'mpas-fill',
+    type: 'fill',
+    source: 'mpas',
+    layout: { visibility: 'none' },
+    paint: {
+      'fill-color': '#ef4444',
+      'fill-opacity': 0.15
+    }
+  });
+  map.addLayer({
+    id: 'mpas-outline',
+    type: 'line',
+    source: 'mpas',
+    layout: { visibility: 'none' },
+    paint: {
+      'line-color': '#ef4444',
+      'line-width': 1,
+      'line-opacity': 0.6
+    }
+  });
+
+  // Fishing regions — outline only
+  map.addSource('fishing-regions', {
+    type: 'geojson',
+    data: { type: 'FeatureCollection', features: [] }
+  });
+  map.addLayer({
+    id: 'fishing-regions-fill',
+    type: 'fill',
+    source: 'fishing-regions',
+    layout: { visibility: 'none' },
+    paint: {
+      'fill-color': '#3b82f6',
+      'fill-opacity': 0.08
+    }
+  });
+  map.addLayer({
+    id: 'fishing-regions-outline',
+    type: 'line',
+    source: 'fishing-regions',
+    layout: { visibility: 'none' },
+    paint: {
+      'line-color': '#3b82f6',
+      'line-width': 1.5,
+      'line-opacity': 0.6
     }
   });
 }
@@ -274,6 +331,34 @@ export function setPortsVisible(visible) {
   if (!map) return;
   const vis = visible ? 'visible' : 'none';
   map.setLayoutProperty('ports-circle', 'visibility', vis);
+}
+
+// Load MPA GeoJSON
+export function loadMpas(geojson) {
+  if (!map || !map.getSource('mpas')) return;
+  map.getSource('mpas').setData(geojson);
+}
+
+// Toggle MPA layer visibility
+export function setMpasVisible(visible) {
+  if (!map) return;
+  const vis = visible ? 'visible' : 'none';
+  map.setLayoutProperty('mpas-fill', 'visibility', vis);
+  map.setLayoutProperty('mpas-outline', 'visibility', vis);
+}
+
+// Load fishing regions GeoJSON
+export function loadFishingRegions(geojson) {
+  if (!map || !map.getSource('fishing-regions')) return;
+  map.getSource('fishing-regions').setData(geojson);
+}
+
+// Toggle fishing regions layer visibility
+export function setFishingRegionsVisible(visible) {
+  if (!map) return;
+  const vis = visible ? 'visible' : 'none';
+  map.setLayoutProperty('fishing-regions-fill', 'visibility', vis);
+  map.setLayoutProperty('fishing-regions-outline', 'visibility', vis);
 }
 
 // Returns true once the map and all sources are ready

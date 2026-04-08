@@ -309,6 +309,14 @@ html, body {
 }
 
 /* --- Sidebar footer -------------------------------------------------------- */
+.data-caveat p {
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.5;
+  margin: 0;
+  font-style: italic;
+}
+
 .sidebar-footer {
   padding: 10px 14px;
   font-size: 11px;
