@@ -339,14 +339,14 @@
     {
       "year": 2024,
       "month": 10,
-      "n_vessels": 3,
-      "n_records": 3
+      "n_vessels": 1107,
+      "n_records": 20594
     },
     {
       "year": 2024,
       "month": 11,
-      "n_vessels": 1,
-      "n_records": 1
+      "n_vessels": 1079,
+      "n_records": 20213
     },
     {
       "year": 2024,
@@ -357,28 +357,64 @@
     {
       "year": 2025,
       "month": 1,
-      "n_vessels": 1,
-      "n_records": 1
+      "n_vessels": 931,
+      "n_records": 18089
     },
     {
       "year": 2025,
       "month": 2,
-      "n_vessels": 808,
-      "n_records": 14802
+      "n_vessels": 809,
+      "n_records": 14823
     },
     {
       "year": 2025,
       "month": 3,
-      "n_vessels": 724,
-      "n_records": 15295
+      "n_vessels": 725,
+      "n_records": 15314
     },
     {
       "year": 2025,
       "month": 4,
-      "n_vessels": 800,
-      "n_records": 13063
+      "n_vessels": 801,
+      "n_records": 13084
+    },
+    {
+      "year": 2025,
+      "month": 5,
+      "n_vessels": 620,
+      "n_records": 11930
+    },
+    {
+      "year": 2025,
+      "month": 8,
+      "n_vessels": 635,
+      "n_records": 11999
+    },
+    {
+      "year": 2025,
+      "month": 9,
+      "n_vessels": 881,
+      "n_records": 12345
+    },
+    {
+      "year": 2025,
+      "month": 10,
+      "n_vessels": 1017,
+      "n_records": 21336
+    },
+    {
+      "year": 2025,
+      "month": 11,
+      "n_vessels": 1083,
+      "n_records": 21582
+    },
+    {
+      "year": 2025,
+      "month": 12,
+      "n_vessels": 54,
+      "n_records": 814
     }
   ],
-  "generated_at": "2026-04-08T13:26:51Z",
+  "generated_at": "2026-04-09T15:32:55Z",
   "year_range": [2020, 2025]
 }
