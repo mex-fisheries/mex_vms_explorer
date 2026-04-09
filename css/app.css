@@ -314,7 +314,18 @@ html, body {
   color: var(--text-dim);
   line-height: 1.5;
   margin: 0;
-  font-style: italic;
+}
+
+.data-caveat a {
+  color: var(--accent-dim);
+  text-decoration: underline;
+}
+
+.data-caveat code {
+  font-size: 10px;
+  background: var(--bg-panel2);
+  padding: 1px 4px;
+  border-radius: 3px;
 }
 
 .sidebar-footer {

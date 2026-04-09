@@ -44,16 +44,10 @@ const translations = {
   downloadCsv:    { es: 'Descargar track (CSV)', en: 'Download track (CSV)' },
   noTrackData:    { es: 'Sin datos de rastreo este mes', en: 'No track data this month' },
 
-  // Caveats
+  // Data caveats and attribution (sidebar)
   dataCaveatsHtml: {
-    es: 'Los puntos representan la posición media diaria (centroide) de cada embarcación. Las trayectorias conectan los centroides diarios dentro de un mes.',
-    en: 'Points represent the daily mean position (centroid) of each vessel. Tracks connect daily centroids within a month.'
-  },
-
-  // Data note
-  dataNoteHtml: {
-    es: 'Todos los datos son públicos y están disponibles en BigQuery en <code>mex-fisheries.mex_vms</code>, y también en el <a href="https://mex-fisheries.github.io/mex-fisheries/es/" target="_blank">sitio web</a>. Una guía para acceder a los datos está disponible <a href="https://mex-fisheries.github.io/mex_vms/#accessing-the-data-via-r" target="_blank">aquí</a>. Para más información sobre el proyecto, contacte a <a href="https://human-ocean-systems.org/" target="_blank">Juan Carlos Villaseñor-Derbez</a>.',
-    en: 'All data are publicly available in BigQuery at <code>mex-fisheries.mex_vms</code>, and also at the <a href="https://mex-fisheries.github.io/mex-fisheries/es/" target="_blank">website</a>. A guide on how to access them is available <a href="https://mex-fisheries.github.io/mex_vms/#accessing-the-data-via-r" target="_blank">here</a>. For further questions about the project you may contact <a href="https://human-ocean-systems.org/" target="_blank">Juan Carlos Villaseñor-Derbez</a>.'
+    es: 'Los puntos representan la posición media diaria (centroide) de cada embarcación. Las trayectorias conectan los centroides diarios dentro de un mes.<br><br>Los datos crudos provienen de <a href="https://datos.gob.mx/" target="_blank">Datos Abiertos</a> y son recopilados por el <a href="https://www.gob.mx/conapesca" target="_blank">SISMEP de CONAPESCA</a> (CC BY 4.0). Los datos han sido modificados: nombres de columnas estandarizados, coordenadas y fechas procesadas, y puntos en tierra eliminados. Datos procesados disponibles en BigQuery en <code>mex-fisheries.mex_vms</code> y en el <a href="https://github.com/mex-fisheries/mex_vms" target="_blank">repositorio</a>. Contacto: <a href="https://human-ocean-systems.org/" target="_blank">Juan Carlos Villaseñor-Derbez</a>.',
+    en: 'Points represent the daily mean position (centroid) of each vessel. Tracks connect daily centroids within a month.<br><br>Raw data come from <a href="https://datos.gob.mx/" target="_blank">Datos Abiertos</a> and are collected by <a href="https://www.gob.mx/conapesca" target="_blank">CONAPESCA\'s SISMEP</a> (CC BY 4.0). Data have been modified: column names standardized, coordinates and dates parsed, and points on land removed. Processed data available in BigQuery at <code>mex-fisheries.mex_vms</code> and on <a href="https://github.com/mex-fisheries/mex_vms" target="_blank">GitHub</a>. Contact: <a href="https://human-ocean-systems.org/" target="_blank">Juan Carlos Villaseñor-Derbez</a>.'
   },
 
   // Color-by options
