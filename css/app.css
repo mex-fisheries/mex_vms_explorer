@@ -113,6 +113,22 @@ html, body {
 
 #sidebar.collapsed { transform: translateX(-100%); }
 
+/* --- Sidebar title --------------------------------------------------------- */
+.sidebar-title {
+  margin: 14px;
+  padding: 16px 14px;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--accent-dim);
+  background: var(--bg-panel2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
 /* --- Panels ---------------------------------------------------------------- */
 .panel {
   padding: 12px 14px;
@@ -349,6 +365,20 @@ html, body {
 /* Override MapLibre attribution position */
 .maplibregl-ctrl-bottom-right { right: 4px; bottom: 4px; }
 .maplibregl-ctrl-attrib { font-size: 10px !important; opacity: 0.6; }
+
+/* Feature name popups */
+.feature-popup .maplibregl-popup-content {
+  padding: 6px 10px;
+  font-size: 12px;
+  background: var(--bg-panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.feature-popup .maplibregl-popup-tip { border-top-color: var(--bg-panel); border-bottom-color: var(--bg-panel); }
+.feature-popup-label { font-weight: 500; }
+.feature-popup-label .popup-id { font-weight: 400; color: var(--text-dim); font-family: monospace; font-size: 11px; }
 
 /* --- Vessel detail panel --------------------------------------------------- */
 #vessel-detail {

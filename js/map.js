@@ -2,6 +2,7 @@
 
 import { State } from './app.js';
 import { vesselColor } from './utils.js';
+import { t } from './i18n.js';
 
 let map = null;
 let onVesselClick = null;
@@ -134,6 +135,33 @@ function _addTrackLayers() {
 }
 
 function _addPolygonLayers() {
+  // Port Voronoi "service areas" — added first so they render beneath MPAs/regions/ports
+  map.addSource('voronoi-ports', {
+    type: 'geojson',
+    data: { type: 'FeatureCollection', features: [] }
+  });
+  map.addLayer({
+    id: 'voronoi-ports-fill',
+    type: 'fill',
+    source: 'voronoi-ports',
+    layout: { visibility: 'none' },
+    paint: {
+      'fill-color': '#f59e0b',
+      'fill-opacity': 0.06
+    }
+  });
+  map.addLayer({
+    id: 'voronoi-ports-outline',
+    type: 'line',
+    source: 'voronoi-ports',
+    layout: { visibility: 'none' },
+    paint: {
+      'line-color': '#b45309',
+      'line-width': 0.8,
+      'line-opacity': 0.5
+    }
+  });
+
   // MPAs — filled polygons (added before vessel layers so vessels draw on top)
   map.addSource('mpas', {
     type: 'geojson',
@@ -230,13 +258,46 @@ function _addInteractions() {
     }
   });
 
-  // Click empty area → deselect
+  // Click empty area → deselect (but not when clicking a polygon/port feature)
   map.on('click', (e) => {
-    const features = map.queryRenderedFeatures(e.point, { layers: ['vessels-circle'] });
+    const layers = ['vessels-circle', 'ports-circle', 'voronoi-ports-fill', 'mpas-fill', 'fishing-regions-fill']
+      .filter(id => map.getLayer(id));
+    const features = map.queryRenderedFeatures(e.point, { layers });
     if (features.length === 0 && onVesselClick) {
       onVesselClick(null);
     }
   });
+
+  // Name-tooltip popups for ports, Voronoi areas, MPAs, and fishing regions
+  _addFeaturePopup('ports-circle',          f => _labelWithId(f.properties.name, f.properties.id));
+  _addFeaturePopup('voronoi-ports-fill',    f => _labelWithId(f.properties.port_name, f.properties.port_id));
+  _addFeaturePopup('mpas-fill',             f => _escapeHtml(f.properties.name || '—'));
+  _addFeaturePopup('fishing-regions-fill',  f => `${_escapeHtml(t('region'))} ${_escapeHtml(f.properties.region)}`);
+}
+
+function _addFeaturePopup(layerId, labelFn) {
+  map.on('click', layerId, (e) => {
+    const feature = e.features && e.features[0];
+    if (!feature) return;
+    const labelHtml = labelFn(feature);
+    new maplibregl.Popup({ closeButton: true, closeOnClick: true, className: 'feature-popup' })
+      .setLngLat(e.lngLat)
+      .setHTML(`<div class="feature-popup-label">${labelHtml}</div>`)
+      .addTo(map);
+  });
+  map.on('mouseenter', layerId, () => { map.getCanvas().style.cursor = 'pointer'; });
+  map.on('mouseleave', layerId, () => { map.getCanvas().style.cursor = ''; });
+}
+
+function _labelWithId(name, id) {
+  const n = _escapeHtml(name || '—');
+  return id ? `${n} <span class="popup-id">(${_escapeHtml(id)})</span>` : n;
+}
+
+function _escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = String(str);
+  return div.innerHTML;
 }
 
 // ----- Public API ------------------------------------------------------------
@@ -359,6 +420,20 @@ export function setFishingRegionsVisible(visible) {
   const vis = visible ? 'visible' : 'none';
   map.setLayoutProperty('fishing-regions-fill', 'visibility', vis);
   map.setLayoutProperty('fishing-regions-outline', 'visibility', vis);
+}
+
+// Load port Voronoi GeoJSON
+export function loadVoronoiPorts(geojson) {
+  if (!map || !map.getSource('voronoi-ports')) return;
+  map.getSource('voronoi-ports').setData(geojson);
+}
+
+// Toggle port Voronoi layer visibility
+export function setVoronoiPortsVisible(visible) {
+  if (!map) return;
+  const vis = visible ? 'visible' : 'none';
+  map.setLayoutProperty('voronoi-ports-fill', 'visibility', vis);
+  map.setLayoutProperty('voronoi-ports-outline', 'visibility', vis);
 }
 
 // Returns true once the map and all sources are ready

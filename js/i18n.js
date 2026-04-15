@@ -8,6 +8,7 @@ const translations = {
   vessels:        { es: 'embarcaciones', en: 'vessels' },
 
   // Sidebar headings
+  controlPanel:   { es: 'Panel de control', en: 'Control Panel' },
   searchVessel:   { es: 'Buscar embarcación', en: 'Search Vessel' },
   searchPlaceholder: { es: 'Nombre de embarcación...', en: 'Type a vessel name...' },
   noMatches:      { es: 'Sin resultados', en: 'No matches' },
@@ -22,6 +23,8 @@ const translations = {
   showPorts:      { es: 'Mostrar puertos principales', en: 'Show Major Ports' },
   showMpas:       { es: 'Mostrar áreas marinas protegidas', en: 'Show Marine Protected Areas' },
   showRegions:    { es: 'Mostrar regiones pesqueras', en: 'Show Fishing Regions' },
+  showVoronoi:    { es: 'Mostrar áreas de influencia de puertos', en: 'Show Port Service Areas' },
+  region:         { es: 'Región', en: 'Region' },
   vesselsVisible: { es: 'embarcaciones visibles', en: 'vessels visible' },
 
   // Species labels

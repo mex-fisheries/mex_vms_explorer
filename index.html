@@ -26,6 +26,11 @@
   <!-- Left sidebar: time controls + filters -->
   <aside id="sidebar">
 
+    <!-- Sidebar title -->
+    <div class="sidebar-title">
+      <span data-i18n="controlPanel">Panel de control</span>
+    </div>
+
     <!-- Vessel search -->
     <section class="panel">
       <h3 data-i18n="searchVessel">Buscar embarcación</h3>
@@ -101,12 +106,16 @@
         <span data-i18n="showPorts">Mostrar puertos principales</span>
       </label>
       <label class="toggle-row">
-        <input type="checkbox" id="toggle-mpas">
-        <span data-i18n="showMpas">Mostrar áreas marinas protegidas</span>
+        <input type="checkbox" id="toggle-voronoi">
+        <span data-i18n="showVoronoi">Mostrar áreas de influencia de puertos</span>
       </label>
       <label class="toggle-row">
         <input type="checkbox" id="toggle-regions">
         <span data-i18n="showRegions">Mostrar regiones pesqueras</span>
+      </label>
+      <label class="toggle-row">
+        <input type="checkbox" id="toggle-mpas">
+        <span data-i18n="showMpas">Mostrar áreas marinas protegidas</span>
       </label>
     </section>
 
