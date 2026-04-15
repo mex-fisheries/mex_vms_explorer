@@ -14,3 +14,4 @@ renv/
 node_modules/
 
 .claude
+.positai
