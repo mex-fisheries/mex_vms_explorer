@@ -225,7 +225,6 @@ async function onVesselClick(rnpa) {
   if (State.monthData) {
     renderFrame(State.monthData, State.currentDay, State.allowedVis, State.registry);
   }
-  updateTrackHint();
 }
 
 function deselectVessel() {
@@ -236,7 +235,6 @@ function deselectVessel() {
   if (State.monthData) {
     renderFrame(State.monthData, State.currentDay, State.allowedVis, State.registry);
   }
-  updateTrackHint();
 }
 
 // --- Track-range slider -----------------------------------------------------
@@ -261,22 +259,21 @@ function initTrackRangeSlider() {
   sStart.max = max;
   sEnd.max   = max;
   updateTrackSlider();
-  updateTrackHint();
 
-  // input → cheap UI update only (labels + fill bar)
+  // input → cheap UI update only (labels)
   sStart.addEventListener('input', () => {
     let s = parseInt(sStart.value, 10);
     if (s > State.trackIdxEnd) s = State.trackIdxEnd;
     State.trackIdxStart = s;
+    sStart.value = s;
     updateTrackLabels();
-    updateTrackFill();
   });
   sEnd.addEventListener('input', () => {
     let e = parseInt(sEnd.value, 10);
     if (e < State.trackIdxStart) e = State.trackIdxStart;
     State.trackIdxEnd = e;
+    sEnd.value = e;
     updateTrackLabels();
-    updateTrackFill();
   });
 
   // change → fires only when user releases. Do the heavy work then.
@@ -298,7 +295,6 @@ function updateTrackSlider() {
   sStart.value = State.trackIdxStart;
   sEnd.value   = State.trackIdxEnd;
   updateTrackLabels();
-  updateTrackFill();
 }
 
 function updateTrackLabels() {
@@ -308,23 +304,6 @@ function updateTrackLabels() {
   const fmt = (e) => formatDate(e.year, e.month, e.day);
   document.getElementById('track-label-start').textContent = fmt(sEntry);
   document.getElementById('track-label-end').textContent   = fmt(eEntry);
-}
-
-function updateTrackFill() {
-  const fill = document.querySelector('#track-slider .dual-slider-fill');
-  if (!fill) return;
-  const max = Math.max(1, State.dateRange.length - 1);
-  fill.style.left  = `${(State.trackIdxStart / max) * 100}%`;
-  fill.style.right = `${100 - (State.trackIdxEnd / max) * 100}%`;
-}
-
-function updateTrackHint() {
-  const hint = document.querySelector('.track-range-hint');
-  const slider = document.getElementById('track-slider');
-  if (!hint || !slider) return;
-  const hasSelection = !!State.selectedRnpa;
-  hint.classList.toggle('visible', !hasSelection);
-  slider.classList.toggle('disabled', !hasSelection);
 }
 
 // Load any months spanning the track range, build chronological points for the

@@ -60,21 +60,6 @@
       </div>
     </section>
 
-    <!-- Track range (only affects the selected vessel's track + chart) -->
-    <section class="panel">
-      <h3 data-i18n="trackRange">Rango de trayectoria</h3>
-      <div class="date-range-row">
-        <span id="track-label-start" class="date-label">—</span>
-        <span class="date-label-sep">→</span>
-        <span id="track-label-end" class="date-label">—</span>
-      </div>
-      <div class="dual-slider" id="track-slider">
-        <div class="dual-slider-fill"></div>
-        <input type="range" id="track-slider-start" min="0" max="0" value="0">
-        <input type="range" id="track-slider-end" min="0" max="0" value="0">
-      </div>
-      <div class="track-range-hint" data-i18n="trackRangeHint">Selecciona una embarcación para ver su trayectoria.</div>
-    </section>
 
     <!-- Filters -->
     <section class="panel">
@@ -158,6 +143,22 @@
       <div id="vd-rnpa" class="vd-subtitle"></div>
     </div>
     <div class="vd-meta" id="vd-meta"></div>
+
+    <!-- Track range slider (controls this vessel's track + chart) -->
+    <div class="vd-track-range">
+      <div class="vd-track-range-title" data-i18n="trackRange">Rango de trayectoria</div>
+      <div class="track-range-row">
+        <label class="track-range-label" data-i18n="rangeFrom">Desde</label>
+        <span class="date-label" id="track-label-start">—</span>
+      </div>
+      <input type="range" id="track-slider-start" class="track-range-slider" min="0" max="0" value="0">
+      <div class="track-range-row">
+        <label class="track-range-label" data-i18n="rangeTo">Hasta</label>
+        <span class="date-label" id="track-label-end">—</span>
+      </div>
+      <input type="range" id="track-slider-end" class="track-range-slider" min="0" max="0" value="0">
+    </div>
+
     <div class="vd-chart-title" data-i18n="pingsChartTitle">Señales VMS por día</div>
     <div id="vd-chart"></div>
     <div id="vd-download"></div>
