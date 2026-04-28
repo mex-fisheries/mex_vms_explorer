@@ -339,24 +339,17 @@ export function renderFrame(monthData, day, allowedVis, registry) {
   );
 }
 
-// Draw the full-month track for a selected vessel
-export function renderTrack(monthData, vi, registry) {
+// Draw the track for a selected vessel from a chronological list of points.
+// points: [{year, month, day, lat, lon, speed, n}]
+export function renderTrack(points) {
   if (!map) return;
 
-  const coords = [];
-  const dotFeatures = [];
-  const sortedDays = [...monthData.dayIndex.keys()].sort((a, b) => a - b);
-
-  for (const day of sortedDays) {
-    const rec = (monthData.dayIndex.get(day) || []).find(r => r.vi === vi);
-    if (!rec) continue;
-    coords.push([rec.lon, rec.lat]);
-    dotFeatures.push({
-      type: 'Feature',
-      geometry: { type: 'Point', coordinates: [rec.lon, rec.lat] },
-      properties: { day, speed: rec.speed }
-    });
-  }
+  const coords = points.map(p => [p.lon, p.lat]);
+  const dotFeatures = points.map(p => ({
+    type: 'Feature',
+    geometry: { type: 'Point', coordinates: [p.lon, p.lat] },
+    properties: { day: p.day, year: p.year, month: p.month, speed: p.speed }
+  }));
 
   map.getSource('track-line').setData({
     type: 'FeatureCollection',

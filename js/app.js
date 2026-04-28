@@ -5,7 +5,7 @@ import { loadMonth } from './tracks.js';
 import { applyFilters, initFilterControls, updateFilterCount, resetFilters } from './filters.js';
 import { initAnimation, updateSlider, stopPlayback } from './animation.js';
 import { updateTopbar, showVesselDetail, hideVesselDetail, initSidebarToggle, initVesselSearch } from './ui.js';
-import { daysInMonth } from './utils.js';
+import { daysInMonth, formatDate } from './utils.js';
 import { setLang, getLang, applyTranslations, t } from './i18n.js';
 
 // --- Global application state -----------------------------------------------
@@ -20,7 +20,12 @@ export const State = {
   currentDay:   1,
 
   dateRange:    [],   // flat array of { year, month, day }
-  dateIndex:    0,    // current position in dateRange
+  dateIndex:    0,    // current position in dateRange (single-day playback)
+
+  // Track-range slider: defines what's drawn for the SELECTED vessel only
+  trackIdxStart: 0,
+  trackIdxEnd:   0,
+  trackUserAdjusted: false,  // becomes true once user drags the track-range slider
 
   allowedVis:   new Set(),
   selectedRnpa: null,
@@ -75,11 +80,15 @@ async function boot() {
     State.dateRange = buildDateRange(manifest);
     State.dateIndex = 0;
 
+    // Default track range = whole first month (matches old single-month-track behavior)
+    setTrackRangeToCurrentMonth();
+
     await initMapAsync();
 
     initFilterControls(onFilterChange);
     initAnimation(onDayStep, onMonthChange);
     initVesselSearch(registry, onVesselClick);
+    initTrackRangeSlider();
     initSidebarToggle();
 
     // Vessel detail close button
@@ -107,7 +116,8 @@ async function boot() {
       setLang(next);
       document.getElementById('lang-toggle').textContent = next === 'es' ? 'EN' : 'ES';
       updateTopbar();
-      updateSlider();  // refresh date label in new language
+      updateSlider();       // refresh date label in new language
+      updateTrackSlider();  // refresh track-range labels
     });
 
     loadPorts(ports);
@@ -150,10 +160,14 @@ async function onMonthChange(year, month) {
     State.monthData = await loadMonth(year, month);
     prefetchAdjacent(year, month);
 
-    clearTrack();
-    hideVesselDetail();
-    State.selectedRnpa = null;
-    State.selectedVi   = null;
+    // If the user hasn't customized the track range, follow the playback month
+    if (!State.trackUserAdjusted) {
+      setTrackRangeToCurrentMonth();
+      updateTrackSlider();
+      // Re-render the selected vessel's track for the new month, if any
+      if (State.selectedRnpa) await applyTrackRange();
+    }
+
     onFilterChange();
     hideLoading();
 
@@ -190,7 +204,7 @@ function onFilterChange() {
 }
 
 // --- Vessel click ------------------------------------------------------------
-function onVesselClick(rnpa) {
+async function onVesselClick(rnpa) {
   if (!rnpa || rnpa === State.selectedRnpa) {
     deselectVessel();
     return;
@@ -200,23 +214,18 @@ function onVesselClick(rnpa) {
   State.selectedVi = State.registry.idx_to_rnpa.indexOf(rnpa);
 
   const vessel = State.registry.vessels[rnpa];
-  if (!vessel) return;
-
-  renderTrack(State.monthData, State.selectedVi, State.registry);
-
-  // Collect track data for the detail chart
-  const trackPoints = [];
-  if (State.monthData) {
-    const sortedDays = [...State.monthData.dayIndex.keys()].sort((a, b) => a - b);
-    for (const day of sortedDays) {
-      const rec = (State.monthData.dayIndex.get(day) || [])
-        .find(r => r.vi === State.selectedVi);
-      if (rec) trackPoints.push({ day, lat: rec.lat, lon: rec.lon, speed: rec.speed, n: rec.n });
-    }
+  if (!vessel) {
+    deselectVessel();
+    return;
   }
 
-  showVesselDetail(rnpa, vessel, trackPoints, State.currentYear, State.currentMonth);
-  renderFrame(State.monthData, State.currentDay, State.allowedVis, State.registry);
+  // Render the selected vessel's track + detail chart over the current track range
+  await applyTrackRange();
+  // Refresh map frame so the selection-highlight filter is applied
+  if (State.monthData) {
+    renderFrame(State.monthData, State.currentDay, State.allowedVis, State.registry);
+  }
+  updateTrackHint();
 }
 
 function deselectVessel() {
@@ -226,6 +235,147 @@ function deselectVessel() {
   hideVesselDetail();
   if (State.monthData) {
     renderFrame(State.monthData, State.currentDay, State.allowedVis, State.registry);
+  }
+  updateTrackHint();
+}
+
+// --- Track-range slider -----------------------------------------------------
+
+function setTrackRangeToCurrentMonth() {
+  const range = State.dateRange;
+  const idx = State.dateIndex;
+  if (range.length === 0 || idx == null) return;
+  const target = range[idx];
+  // Find first and last index in dateRange with same year+month
+  let s = idx, e = idx;
+  while (s > 0 && range[s - 1].year === target.year && range[s - 1].month === target.month) s--;
+  while (e < range.length - 1 && range[e + 1].year === target.year && range[e + 1].month === target.month) e++;
+  State.trackIdxStart = s;
+  State.trackIdxEnd   = e;
+}
+
+function initTrackRangeSlider() {
+  const sStart = document.getElementById('track-slider-start');
+  const sEnd   = document.getElementById('track-slider-end');
+  const max = State.dateRange.length - 1;
+  sStart.max = max;
+  sEnd.max   = max;
+  updateTrackSlider();
+  updateTrackHint();
+
+  // input → cheap UI update only (labels + fill bar)
+  sStart.addEventListener('input', () => {
+    let s = parseInt(sStart.value, 10);
+    if (s > State.trackIdxEnd) s = State.trackIdxEnd;
+    State.trackIdxStart = s;
+    updateTrackLabels();
+    updateTrackFill();
+  });
+  sEnd.addEventListener('input', () => {
+    let e = parseInt(sEnd.value, 10);
+    if (e < State.trackIdxStart) e = State.trackIdxStart;
+    State.trackIdxEnd = e;
+    updateTrackLabels();
+    updateTrackFill();
+  });
+
+  // change → fires only when user releases. Do the heavy work then.
+  const onChange = () => {
+    State.trackUserAdjusted = true;
+    if (State.selectedRnpa) applyTrackRange();
+  };
+  sStart.addEventListener('change', onChange);
+  sEnd.addEventListener('change', onChange);
+}
+
+function updateTrackSlider() {
+  const sStart = document.getElementById('track-slider-start');
+  const sEnd   = document.getElementById('track-slider-end');
+  if (!sStart || !sEnd) return;
+  const max = Math.max(0, State.dateRange.length - 1);
+  sStart.max = max;
+  sEnd.max   = max;
+  sStart.value = State.trackIdxStart;
+  sEnd.value   = State.trackIdxEnd;
+  updateTrackLabels();
+  updateTrackFill();
+}
+
+function updateTrackLabels() {
+  const sEntry = State.dateRange[State.trackIdxStart];
+  const eEntry = State.dateRange[State.trackIdxEnd];
+  if (!sEntry || !eEntry) return;
+  const fmt = (e) => formatDate(e.year, e.month, e.day);
+  document.getElementById('track-label-start').textContent = fmt(sEntry);
+  document.getElementById('track-label-end').textContent   = fmt(eEntry);
+}
+
+function updateTrackFill() {
+  const fill = document.querySelector('#track-slider .dual-slider-fill');
+  if (!fill) return;
+  const max = Math.max(1, State.dateRange.length - 1);
+  fill.style.left  = `${(State.trackIdxStart / max) * 100}%`;
+  fill.style.right = `${100 - (State.trackIdxEnd / max) * 100}%`;
+}
+
+function updateTrackHint() {
+  const hint = document.querySelector('.track-range-hint');
+  const slider = document.getElementById('track-slider');
+  if (!hint || !slider) return;
+  const hasSelection = !!State.selectedRnpa;
+  hint.classList.toggle('visible', !hasSelection);
+  slider.classList.toggle('disabled', !hasSelection);
+}
+
+// Load any months spanning the track range, build chronological points for the
+// selected vessel, then render its track + detail chart.
+async function applyTrackRange() {
+  if (!State.selectedRnpa || State.selectedVi == null) {
+    clearTrack();
+    return;
+  }
+
+  // Collect month keys spanning the range
+  const monthKeys = new Set();
+  for (let i = State.trackIdxStart; i <= State.trackIdxEnd; i++) {
+    const d = State.dateRange[i];
+    if (!d) continue;
+    monthKeys.add(`${d.year}_${String(d.month).padStart(2, '0')}`);
+  }
+
+  // Show a small loading indication if many months need fetching (LRU may already have them)
+  const monthsArr = await Promise.all([...monthKeys].map(async (key) => {
+    const [yStr, mStr] = key.split('_');
+    const data = await loadMonth(parseInt(yStr, 10), parseInt(mStr, 10));
+    return [key, data];
+  }));
+  const months = new Map(monthsArr);
+
+  // Build chronological points for this vessel
+  const points = [];
+  for (let i = State.trackIdxStart; i <= State.trackIdxEnd; i++) {
+    const d = State.dateRange[i];
+    const key = `${d.year}_${String(d.month).padStart(2, '0')}`;
+    const md = months.get(key);
+    if (!md) continue;
+    const rec = (md.dayIndex.get(d.day) || []).find(r => r.vi === State.selectedVi);
+    if (rec) {
+      points.push({
+        year: d.year, month: d.month, day: d.day,
+        lat: rec.lat, lon: rec.lon, speed: rec.speed, n: rec.n
+      });
+    }
+  }
+
+  renderTrack(points);
+
+  const vessel = State.registry.vessels[State.selectedRnpa];
+  if (vessel) {
+    showVesselDetail(
+      State.selectedRnpa, vessel, points,
+      State.dateRange[State.trackIdxStart],
+      State.dateRange[State.trackIdxEnd]
+    );
   }
 }
 

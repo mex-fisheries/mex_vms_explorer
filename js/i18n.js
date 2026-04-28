@@ -13,6 +13,8 @@ const translations = {
   searchPlaceholder: { es: 'Nombre de embarcación...', en: 'Type a vessel name...' },
   noMatches:      { es: 'Sin resultados', en: 'No matches' },
   date:           { es: 'Fecha', en: 'Date' },
+  trackRange:     { es: 'Rango de trayectoria', en: 'Track range' },
+  trackRangeHint: { es: 'Selecciona una embarcación para ver su trayectoria en este rango.', en: 'Select a vessel to view its track over this range.' },
   speed:          { es: 'Velocidad', en: 'Speed' },
   filters:        { es: 'Filtros', en: 'Filters' },
   targetSpecies:  { es: 'Especie objetivo', en: 'Target Species' },

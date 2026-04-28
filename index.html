@@ -60,6 +60,22 @@
       </div>
     </section>
 
+    <!-- Track range (only affects the selected vessel's track + chart) -->
+    <section class="panel">
+      <h3 data-i18n="trackRange">Rango de trayectoria</h3>
+      <div class="date-range-row">
+        <span id="track-label-start" class="date-label">—</span>
+        <span class="date-label-sep">→</span>
+        <span id="track-label-end" class="date-label">—</span>
+      </div>
+      <div class="dual-slider" id="track-slider">
+        <div class="dual-slider-fill"></div>
+        <input type="range" id="track-slider-start" min="0" max="0" value="0">
+        <input type="range" id="track-slider-end" min="0" max="0" value="0">
+      </div>
+      <div class="track-range-hint" data-i18n="trackRangeHint">Selecciona una embarcación para ver su trayectoria.</div>
+    </section>
+
     <!-- Filters -->
     <section class="panel">
       <h3 data-i18n="filters">Filtros</h3>

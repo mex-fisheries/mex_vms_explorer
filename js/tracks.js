@@ -1,7 +1,7 @@
 // tracks.js — Load and decode monthly track JSON files, with a small LRU cache
 
 // Cache holds up to MAX_CACHED months in memory
-const MAX_CACHED = 5;
+const MAX_CACHED = 24;
 const cache = new Map();  // key: "YYYY_MM" → decoded month object
 
 // Decode a raw month JSON object into a day-indexed lookup for fast frame retrieval

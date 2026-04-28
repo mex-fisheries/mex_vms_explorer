@@ -1,8 +1,8 @@
-// ui.js — Vessel detail panel, month nav, topbar, search, CSV download
+// ui.js — Vessel detail panel, topbar, search, CSV download
 
 import { State } from './app.js';
 import { t, getLang, speciesLabels, gearLabels } from './i18n.js';
-import { daysInMonth, formatDate } from './utils.js';
+import { formatDate } from './utils.js';
 
 // Update the top bar stats line
 export function updateTopbar() {
@@ -12,8 +12,9 @@ export function updateTopbar() {
     `${State.allowedVis?.size ?? '—'} ${t('vessels')}`;
 }
 
-// Show the vessel detail side panel for the given RNPA
-export function showVesselDetail(rnpa, vessel, trackPoints, year, month) {
+// Show the vessel detail side panel for the given RNPA.
+// trackPoints: [{year,month,day,lat,lon,speed,n}]; startEntry/endEntry: {year,month,day}.
+export function showVesselDetail(rnpa, vessel, trackPoints, startEntry, endEntry) {
   document.getElementById('vessel-detail').classList.remove('hidden');
   document.getElementById('vd-name').textContent  = vessel.name || rnpa;
   document.getElementById('vd-rnpa').textContent  = `RNPA: ${rnpa}`;
@@ -29,19 +30,26 @@ export function showVesselDetail(rnpa, vessel, trackPoints, year, month) {
     `<div class="vd-row"><span class="vd-key">${k}</span><span class="vd-val">${v}</span></div>`
   ).join('');
 
-  // Pings chart (x = day of month, y = number of VMS pings)
+  // Pings chart (x = ISO date, y = number of VMS pings) — date axis spans full range
   if (trackPoints && trackPoints.length > 0) {
-    const days  = trackPoints.map(p => p.day);
+    const xs    = trackPoints.map(p => `${p.year}-${String(p.month).padStart(2,'0')}-${String(p.day).padStart(2,'0')}`);
     const pings = trackPoints.map(p => p.n);
 
+    const startStr = startEntry
+      ? `${startEntry.year}-${String(startEntry.month).padStart(2,'0')}-${String(startEntry.day).padStart(2,'0')}`
+      : xs[0];
+    const endStr = endEntry
+      ? `${endEntry.year}-${String(endEntry.month).padStart(2,'0')}-${String(endEntry.day).padStart(2,'0')}`
+      : xs[xs.length - 1];
+
     const trace = {
-      x: days,
+      x: xs,
       y: pings,
       type: 'bar',
       marker: { color: '#34d399' },
       hovertemplate: getLang() === 'es'
-        ? 'Día %{x}: %{y} señales<extra></extra>'
-        : 'Day %{x}: %{y} pings<extra></extra>'
+        ? '%{x}: %{y} señales<extra></extra>'
+        : '%{x}: %{y} pings<extra></extra>'
     };
 
     const layout = {
@@ -50,15 +58,14 @@ export function showVesselDetail(rnpa, vessel, trackPoints, year, month) {
       plot_bgcolor: 'transparent',
       font: { color: '#5f6b7a', size: 10 },
       xaxis: {
-        title: '',
+        type: 'date',
         gridcolor: '#d0d5dd',
         zerolinecolor: '#d0d5dd',
         tickfont: { color: '#5f6b7a', size: 9 },
-        range: [0.5, daysInMonth(year, month) + 0.5],
-        dtick: 5
+        range: [startStr, endStr],
+        nticks: 5
       },
       yaxis: {
-        title: '',
         gridcolor: '#d0d5dd',
         zerolinecolor: '#d0d5dd',
         rangemode: 'tozero',
@@ -79,14 +86,11 @@ export function showVesselDetail(rnpa, vessel, trackPoints, year, month) {
   if (trackPoints && trackPoints.length > 0) {
     downloadEl.innerHTML = `<button class="download-btn" id="btn-download-csv">${t('downloadCsv')}</button>`;
     document.getElementById('btn-download-csv').addEventListener('click', () => {
-      _downloadCsv(rnpa, vessel, trackPoints, year, month);
+      _downloadCsv(rnpa, vessel, trackPoints, startEntry, endEntry);
     });
   } else {
     downloadEl.innerHTML = '';
   }
-
-  // Data note
-
 }
 
 export function hideVesselDetail() {
@@ -174,10 +178,10 @@ function _escapeHtml(str) {
   return div.innerHTML;
 }
 
-function _downloadCsv(rnpa, vessel, trackPoints, year, month) {
+function _downloadCsv(rnpa, vessel, trackPoints, startEntry, endEntry) {
   const header = 'date,lat,lon,speed_knots,n_pings';
   const rows = trackPoints.map(p => {
-    const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(p.day).padStart(2,'0')}`;
+    const dateStr = `${p.year}-${String(p.month).padStart(2,'0')}-${String(p.day).padStart(2,'0')}`;
     return `${dateStr},${p.lat},${p.lon},${p.speed},${p.n}`;
   });
   const csv = [header, ...rows].join('\n');
@@ -186,8 +190,9 @@ function _downloadCsv(rnpa, vessel, trackPoints, year, month) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   const name = (vessel.name || rnpa).replace(/[^a-zA-Z0-9]/g, '_');
+  const fmt = (e) => e ? `${e.year}${String(e.month).padStart(2,'0')}${String(e.day).padStart(2,'0')}` : '';
   a.href = url;
-  a.download = `${name}_${year}_${String(month).padStart(2,'0')}.csv`;
+  a.download = `${name}_${fmt(startEntry)}_${fmt(endEntry)}.csv`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
